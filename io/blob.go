@@ -84,6 +84,15 @@ func (bfs *blobFileIO) preprocess(key string) string {
 		key = after
 	}
 
+	// If the key contains @ (like my-container@my-account.dfs.core.windows.net/path),
+	// extract just the path part after the first /
+	if strings.Contains(key, "@") {
+		parts := strings.SplitN(key, "/", 2)
+		if len(parts) == 2 {
+			key = parts[1] // Remove the leading slash
+		}
+	}
+
 	return strings.TrimPrefix(key, bfs.bucketName+"/")
 }
 

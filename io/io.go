@@ -264,14 +264,10 @@ func inferFileIOFromSchema(ctx context.Context, path string, props map[string]st
 			return nil, err
 		}
 		
-		// For Azure, determine the correct bucket name to use for path processing
-		// If the URL contains @ symbol, extract just the container name
+		// Extract container name from URL - handle both parsed.User (from abfs://container@account) and parsed.Host
 		bucketName := parsed.Host
-		if strings.Contains(parsed.Host, "@") {
-			parts := strings.Split(parsed.Host, "@")
-			if len(parts) >= 1 {
-				bucketName = parts[0] // Use just the container name part
-			}
+		if parsed.User != nil && parsed.User.Username() != "" {
+			bucketName = parsed.User.Username()
 		}
 		
 		return createBlobFS(ctx, bucket, bucketName), nil
